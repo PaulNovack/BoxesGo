@@ -1,7 +1,7 @@
 # BoxesGo
 
 
-A backend for react boxes app
+A backend for BoxesReact
 
 An application optimized for using on a cell phone to allow taking pictures of items and putting in boxes for moving or inventory purposes.
 

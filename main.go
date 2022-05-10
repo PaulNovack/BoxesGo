@@ -3,7 +3,6 @@ package main
 import (
 	"database/sql"
 	"encoding/json"
-	"fmt"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/gorilla/mux"
 	"log"
@@ -12,24 +11,30 @@ import (
 )
 
 var db *sql.DB
+var ZMQAlert bool
 
 func main() {
-
-	db := dbconnect()
-	db.Ping()
+	ZMQAlert = false
+	db, _ = sql.Open("mysql", "boxes:boxes@(127.0.0.1:3306)/boxes?parseTime=true")
+	err := db.Ping()
+	if err != nil {
+		log.Fatal(err)
+	}
+	db.SetMaxOpenConns(100)
+	db.SetMaxIdleConns(100)
 	r := mux.NewRouter()
 	// Handle Boxes endpoints
 	r.HandleFunc("/boxes", postBox).Methods("POST")
-	r.HandleFunc("/boxes/{id}", putBox).Methods("PUT")
+	r.HandleFunc("/boxes", putBox).Methods("PUT")
 	r.HandleFunc("/boxes", getAllBoxes).Methods("GET")
+	r.HandleFunc("/boxes/{box_id}", deleteBox).Methods("DELETE")
 	// Handle Items endpoints
-	r.HandleFunc("/items/{box_id}", postItem).Methods("POST")
+	r.HandleFunc("/items", postItem).Methods("POST")
+	r.HandleFunc("/items", putItem).Methods("PUT")
 	r.HandleFunc("/items/{box_id}", getItems).Methods("GET")
-	r.HandleFunc("/items/{id}", putItem).Methods("PUT")
-	r.HandleFunc("/items/{id}", deleteItem).Methods("DELETE")
+	r.HandleFunc("/items/{item_id}", deleteItem).Methods("DELETE")
 	//Handle User endpoints
-	r.HandleFunc("/user/{id}", getUser).Methods("GET")
-	r.HandleFunc("/user/", createUser).Methods("POST")
+	r.HandleFunc("/login", getUser).Methods("GET")
 	// Endpoint react front end can check to see backend is up
 	r.HandleFunc("/up", func(w http.ResponseWriter, r *http.Request) {
 		// Just check server is up
@@ -43,12 +48,7 @@ func main() {
 		WriteTimeout: 15 * time.Second,
 		ReadTimeout:  15 * time.Second,
 	}
-	user, err := dbgetUserId(db, "paulnovack", "paulnovack")
-	if err != nil {
-		log.Fatal(err)
-	}
 
-	fmt.Printf("%v\n", user)
 	log.Fatal(srv.ListenAndServe())
 
 }

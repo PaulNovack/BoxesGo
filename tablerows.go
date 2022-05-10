@@ -8,7 +8,7 @@ import (
 type User struct {
 	Id         int       `json:"id"`
 	Username   string    `json:"username"`
-	Password   string    `json:"password"`
+	Password   string    `json:"password,omitempty"`
 	Authkey    string    `json:"authkey"`
 	Createdate time.Time `json:"created_at"`
 }
@@ -16,7 +16,7 @@ type User struct {
 type Box struct {
 	Id         int       `json:"id"`
 	Userid     int       `json:"user_id"`
-	BoxId      int       `json:"box_id"`
+	Weight     float64   `json:"weight"`
 	Name       string    `json:"name"`
 	Picture    string    `json:"picture"`
 	Createdate time.Time `json:"created_at"`
